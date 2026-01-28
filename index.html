@@ -2,412 +2,417 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#667eea">
-    <meta name="description" content="Aplikasi Manajemen Keuangan Pribadi">
-    <title>💰 Dompet Digital</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dompet Digital Tracker</title>
+    
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <!-- Splash Screen -->
-    <div id="splash" class="splash">
-        <div class="splash-content">
-            <i class="fas fa-wallet splash-icon"></i>
-            <h1>Dompet Digital</h1>
-            <div class="loader"></div>
-        </div>
-    </div>
-
-    <!-- Main App -->
-    <div id="app" class="app hidden">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-content">
-                <div class="greeting">
-                    <h1 id="greeting-text">Selamat Pagi!</h1>
-                    <p id="current-date"></p>
+<body class="bg-gray-50 min-h-screen">
+    <div id="app" class="max-w-6xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        
+        <!-- ==================== HEADER ==================== -->
+        <header class="mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="gradient-bg p-3 rounded-xl shadow-lg">
+                        <i data-lucide="wallet" class="w-8 h-8 text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Dompet Digital</h1>
+                        <p class="text-gray-500 text-sm">Tracker Keuangan Pribadi</p>
+                    </div>
                 </div>
-                <div class="header-actions">
-                    <button class="btn-icon" onclick="showSettings()">
-                        <i class="fas fa-cog"></i>
+                <div class="flex gap-2">
+                    <button onclick="showImportModal()" class="flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40">
+                        <i data-lucide="upload" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">Import</span>
+                    </button>
+                    <button onclick="exportToCSV()" class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">CSV</span>
+                    </button>
+                    <button onclick="exportToXLSX()" class="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40">
+                        <i data-lucide="file-down" class="w-4 h-4"></i>
+                        <span class="hidden sm:inline">XLSX</span>
                     </button>
                 </div>
             </div>
         </header>
 
-        <!-- Balance Card -->
-        <section class="balance-section">
-            <div class="balance-card">
-                <div class="balance-header">
-                    <span>Total Saldo</span>
-                    <button class="btn-icon small" onclick="toggleBalance()">
-                        <i class="fas fa-eye" id="eye-icon"></i>
+        <!-- ==================== DASHBOARD CARDS ==================== -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8">
+            <!-- Total Saldo -->
+            <div class="balance-gradient rounded-2xl p-6 text-white card-shadow transform hover:scale-[1.02] transition-transform duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-white/20 p-3 rounded-xl">
+                        <i data-lucide="wallet" class="w-6 h-6"></i>
+                    </div>
+                    <span class="text-white/80 text-sm font-medium">Total Saldo</span>
+                </div>
+                <p id="totalBalance" class="text-3xl font-bold">Rp 0</p>
+                <p class="text-white/70 text-sm mt-2">Saldo saat ini</p>
+            </div>
+
+            <!-- Total Pemasukan -->
+            <div class="income-gradient rounded-2xl p-6 text-white card-shadow transform hover:scale-[1.02] transition-transform duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-white/20 p-3 rounded-xl">
+                        <i data-lucide="trending-up" class="w-6 h-6"></i>
+                    </div>
+                    <span class="text-white/80 text-sm font-medium">Pemasukan</span>
+                </div>
+                <p id="totalIncome" class="text-3xl font-bold">Rp 0</p>
+                <p class="text-white/70 text-sm mt-2">Total pemasukan</p>
+            </div>
+
+            <!-- Total Pengeluaran -->
+            <div class="expense-gradient rounded-2xl p-6 text-white card-shadow transform hover:scale-[1.02] transition-transform duration-200">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="bg-white/20 p-3 rounded-xl">
+                        <i data-lucide="trending-down" class="w-6 h-6"></i>
+                    </div>
+                    <span class="text-white/80 text-sm font-medium">Pengeluaran</span>
+                </div>
+                <p id="totalExpense" class="text-3xl font-bold">Rp 0</p>
+                <p class="text-white/70 text-sm mt-2">Total pengeluaran</p>
+            </div>
+        </div>
+
+        <!-- ==================== MAIN CONTENT ==================== -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+            
+            <!-- ========== FORM INPUT ========== -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-2xl p-6 card-shadow">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="bg-indigo-100 p-2 rounded-lg">
+                            <i data-lucide="plus-circle" class="w-5 h-5 text-indigo-600"></i>
+                        </div>
+                        <h2 class="text-lg font-semibold text-gray-800">Tambah Transaksi</h2>
+                    </div>
+                    
+                    <form id="transactionForm" class="space-y-4">
+                        <!-- Tanggal -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Tanggal</label>
+                            <div class="relative">
+                                <input type="date" id="date" required
+                                    class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white">
+                            </div>
+                        </div>
+
+                        <!-- Deskripsi -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Deskripsi</label>
+                            <input type="text" id="description" placeholder="Contoh: Gaji bulanan" required
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white">
+                        </div>
+
+                        <!-- Kategori -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Kategori</label>
+                            <select id="category" required
+                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white appearance-none cursor-pointer">
+                                <option value="">Pilih Kategori</option>
+                                <optgroup label="Pemasukan">
+                                    <option value="Gaji">💰 Gaji</option>
+                                    <option value="Bonus">🎁 Bonus</option>
+                                    <option value="Investasi">📈 Investasi</option>
+                                    <option value="Freelance">💻 Freelance</option>
+                                    <option value="Hadiah">🎀 Hadiah</option>
+                                    <option value="Lainnya (Masuk)">📥 Lainnya</option>
+                                </optgroup>
+                                <optgroup label="Pengeluaran">
+                                    <option value="Makan">🍔 Makan</option>
+                                    <option value="Transport">🚗 Transport</option>
+                                    <option value="Belanja">🛒 Belanja</option>
+                                    <option value="Hiburan">🎬 Hiburan</option>
+                                    <option value="Tagihan">📄 Tagihan</option>
+                                    <option value="Kesehatan">💊 Kesehatan</option>
+                                    <option value="Pendidikan">📚 Pendidikan</option>
+                                    <option value="Lainnya (Keluar)">📤 Lainnya</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <!-- Tipe Transaksi -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Tipe Transaksi</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="relative cursor-pointer">
+                                    <input type="radio" name="type" value="income" class="peer sr-only" required>
+                                    <div class="flex items-center justify-center gap-2 p-3 border-2 border-gray-200 rounded-xl peer-checked:border-emerald-500 peer-checked:bg-emerald-50 transition-all duration-200">
+                                        <i data-lucide="arrow-up-circle" class="w-5 h-5 text-emerald-500"></i>
+                                        <span class="font-medium text-gray-700 peer-checked:text-emerald-600">Pemasukan</span>
+                                    </div>
+                                </label>
+                                <label class="relative cursor-pointer">
+                                    <input type="radio" name="type" value="expense" class="peer sr-only">
+                                    <div class="flex items-center justify-center gap-2 p-3 border-2 border-gray-200 rounded-xl peer-checked:border-red-500 peer-checked:bg-red-50 transition-all duration-200">
+                                        <i data-lucide="arrow-down-circle" class="w-5 h-5 text-red-500"></i>
+                                        <span class="font-medium text-gray-700 peer-checked:text-red-600">Pengeluaran</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Nominal -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Nominal</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">Rp</span>
+                                <input type="text" id="amount" placeholder="0" required inputmode="numeric"
+                                    class="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white">
+                                <input type="hidden" id="amountRaw" value="0">
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Contoh: 10.000 atau 10000</p>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit"
+                            class="w-full gradient-bg text-white py-3.5 rounded-xl font-semibold hover:opacity-90 transition-all duration-200 shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 flex items-center justify-center gap-2">
+                            <i data-lucide="plus" class="w-5 h-5"></i>
+                            Tambah Transaksi
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ========== RIWAYAT TRANSAKSI ========== -->
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-2xl p-6 card-shadow h-full">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="bg-purple-100 p-2 rounded-lg">
+                                <i data-lucide="history" class="w-5 h-5 text-purple-600"></i>
+                            </div>
+                            <h2 class="text-lg font-semibold text-gray-800">Riwayat Transaksi</h2>
+                        </div>
+                        <span id="transactionCount" class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-medium">0 transaksi</span>
+                    </div>
+
+                    <!-- Filter & Search -->
+                    <div class="flex flex-col sm:flex-row gap-3 mb-4">
+                        <div class="relative flex-1">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                            <input type="text" id="searchInput" placeholder="Cari transaksi..."
+                                class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm">
+                        </div>
+                        <select id="filterType"
+                            class="px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white text-sm cursor-pointer">
+                            <option value="all">Semua</option>
+                            <option value="income">Pemasukan</option>
+                            <option value="expense">Pengeluaran</option>
+                        </select>
+                    </div>
+
+                    <!-- Transaction List -->
+                    <div id="transactionList" class="space-y-3 max-h-[500px] overflow-y-auto scrollbar-thin pr-2">
+                        <!-- Empty State -->
+                        <div id="emptyState" class="flex flex-col items-center justify-center py-12 text-gray-400">
+                            <i data-lucide="inbox" class="w-16 h-16 mb-4 stroke-1"></i>
+                            <p class="text-lg font-medium">Belum ada transaksi</p>
+                            <p class="text-sm">Tambahkan transaksi pertama Anda</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== CATEGORY BREAKDOWN ==================== -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+            <!-- Pemasukan per Kategori -->
+            <div class="bg-white rounded-2xl p-6 card-shadow">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-emerald-100 p-2 rounded-lg">
+                            <i data-lucide="pie-chart" class="w-5 h-5 text-emerald-600"></i>
+                        </div>
+                        <h2 class="text-lg font-semibold text-gray-800">Pemasukan per Kategori</h2>
+                    </div>
+                    <span id="incomeCategoryCount" class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-sm font-medium">0 kategori</span>
+                </div>
+                
+                <!-- Income Category List -->
+                <div id="incomeCategoryList" class="space-y-3 max-h-[300px] overflow-y-auto scrollbar-thin pr-2">
+                    <div class="flex flex-col items-center justify-center py-8 text-gray-400">
+                        <i data-lucide="inbox" class="w-12 h-12 mb-3 stroke-1"></i>
+                        <p class="text-sm">Belum ada pemasukan</p>
+                    </div>
+                </div>
+
+                <!-- Income Total -->
+                <div id="incomeCategoryTotal" class="hidden mt-4 pt-4 border-t border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-gray-700">Total Pemasukan</span>
+                        <span id="incomeTotalAmount" class="font-bold text-emerald-600 text-lg">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pengeluaran per Kategori -->
+            <div class="bg-white rounded-2xl p-6 card-shadow">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-red-100 p-2 rounded-lg">
+                            <i data-lucide="pie-chart" class="w-5 h-5 text-red-600"></i>
+                        </div>
+                        <h2 class="text-lg font-semibold text-gray-800">Pengeluaran per Kategori</h2>
+                    </div>
+                    <span id="expenseCategoryCount" class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium">0 kategori</span>
+                </div>
+                
+                <!-- Expense Category List -->
+                <div id="expenseCategoryList" class="space-y-3 max-h-[300px] overflow-y-auto scrollbar-thin pr-2">
+                    <div class="flex flex-col items-center justify-center py-8 text-gray-400">
+                        <i data-lucide="inbox" class="w-12 h-12 mb-3 stroke-1"></i>
+                        <p class="text-sm">Belum ada pengeluaran</p>
+                    </div>
+                </div>
+
+                <!-- Expense Total -->
+                <div id="expenseCategoryTotal" class="hidden mt-4 pt-4 border-t border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-gray-700">Total Pengeluaran</span>
+                        <span id="expenseTotalAmount" class="font-bold text-red-600 text-lg">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== FOOTER ==================== -->
+        <footer class="mt-8 text-center text-gray-400 text-sm">
+            <p>© 2024 Dompet Digital Tracker. Data tersimpan di browser Anda.</p>
+        </footer>
+    </div>
+
+    <!-- ==================== TOAST NOTIFICATION ==================== -->
+    <div id="toast" class="fixed bottom-4 right-4 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <div class="bg-gray-800 text-white px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
+            <span id="toastMessage">Berhasil!</span>
+        </div>
+    </div>
+
+    <!-- ==================== DELETE CONFIRMATION MODAL ==================== -->
+    <div id="deleteModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 m-4 max-w-sm w-full shadow-2xl animate-slide-in">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="bg-red-100 p-2 rounded-lg">
+                    <i data-lucide="trash-2" class="w-5 h-5 text-red-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800">Hapus Transaksi</h3>
+            </div>
+            <p class="text-gray-600 mb-6">Apakah Anda yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan.</p>
+            <div class="flex gap-3">
+                <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-all duration-200">
+                    Batal
+                </button>
+                <button onclick="confirmDelete()" class="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-all duration-200">
+                    Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== IMPORT MODAL ==================== -->
+    <div id="importModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 m-4 max-w-md w-full shadow-2xl animate-slide-in">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="bg-amber-100 p-2 rounded-lg">
+                    <i data-lucide="upload" class="w-5 h-5 text-amber-600"></i>
+                </div>
+                <h3 class="text-lg font-semibold text-gray-800">Import Data Transaksi</h3>
+            </div>
+            
+            <!-- File Drop Zone -->
+            <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-amber-400 hover:bg-amber-50/50 transition-all duration-200 cursor-pointer mb-4">
+                <input type="file" id="fileInput" accept=".csv,.xls,.xlsx" class="hidden">
+                <i data-lucide="file-up" class="w-12 h-12 text-gray-400 mx-auto mb-3"></i>
+                <p class="text-gray-600 font-medium">Drag & drop file atau klik untuk memilih</p>
+                <p class="text-gray-400 text-sm mt-1">Format: CSV, XLS, XLSX</p>
+            </div>
+
+            <!-- Selected File Info -->
+            <div id="fileInfo" class="hidden bg-gray-50 rounded-xl p-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-amber-100 p-2 rounded-lg">
+                        <i data-lucide="file-text" class="w-5 h-5 text-amber-600"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p id="fileName" class="font-medium text-gray-800 truncate">filename.csv</p>
+                        <p id="fileSize" class="text-xs text-gray-500">0 KB</p>
+                    </div>
+                    <button onclick="clearFileSelection()" class="p-2 hover:bg-gray-200 rounded-lg transition-all">
+                        <i data-lucide="x" class="w-4 h-4 text-gray-500"></i>
                     </button>
                 </div>
-                <h2 class="balance-amount" id="total-balance">Rp 0</h2>
-                <div class="balance-stats">
-                    <div class="stat income">
-                        <i class="fas fa-arrow-down"></i>
+            </div>
+
+            <!-- Import Options -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Opsi Import</label>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="importMode" value="merge" checked class="w-4 h-4 text-amber-500 focus:ring-amber-500">
                         <div>
-                            <span>Pemasukan</span>
-                            <strong id="total-income">Rp 0</strong>
+                            <p class="font-medium text-gray-800">Gabungkan</p>
+                            <p class="text-xs text-gray-500">Tambahkan ke data yang sudah ada</p>
                         </div>
-                    </div>
-                    <div class="stat expense">
-                        <i class="fas fa-arrow-up"></i>
+                    </label>
+                    <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
+                        <input type="radio" name="importMode" value="replace" class="w-4 h-4 text-amber-500 focus:ring-amber-500">
                         <div>
-                            <span>Pengeluaran</span>
-                            <strong id="total-expense">Rp 0</strong>
+                            <p class="font-medium text-gray-800">Ganti Semua</p>
+                            <p class="text-xs text-gray-500">Hapus data lama, ganti dengan data baru</p>
                         </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Preview -->
+            <div id="importPreview" class="hidden mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Preview Data</label>
+                <div class="bg-gray-50 rounded-xl p-3 max-h-40 overflow-y-auto scrollbar-thin">
+                    <p id="previewCount" class="text-sm text-gray-600 mb-2"></p>
+                    <div id="previewList" class="space-y-1 text-xs"></div>
+                </div>
+            </div>
+
+            <!-- Format Guide -->
+            <div class="bg-blue-50 rounded-xl p-4 mb-4">
+                <div class="flex items-start gap-2">
+                    <i data-lucide="info" class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0"></i>
+                    <div class="text-xs text-blue-700">
+                        <p class="font-medium mb-1">Format file yang didukung:</p>
+                        <p>Header: Tanggal, Deskripsi, Kategori, Tipe, Nominal</p>
+                        <p>Tipe: "Pemasukan" atau "Pengeluaran"</p>
+                        <p>Tanggal: YYYY-MM-DD (contoh: 2024-01-15)</p>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <!-- Quick Actions -->
-        <section class="quick-actions">
-            <button class="action-btn income" onclick="showAddTransaction('income')">
-                <i class="fas fa-plus-circle"></i>
-                <span>Pemasukan</span>
-            </button>
-            <button class="action-btn expense" onclick="showAddTransaction('expense')">
-                <i class="fas fa-minus-circle"></i>
-                <span>Pengeluaran</span>
-            </button>
-            <button class="action-btn schedule" onclick="showSchedule()">
-                <i class="fas fa-calendar-alt"></i>
-                <span>Jadwal</span>
-            </button>
-            <button class="action-btn report" onclick="showReport()">
-                <i class="fas fa-chart-pie"></i>
-                <span>Laporan</span>
-            </button>
-        </section>
-
-        <!-- Today Summary -->
-        <section class="today-section">
-            <div class="section-header">
-                <h3><i class="fas fa-calendar-day"></i> Hari Ini</h3>
-                <span class="badge" id="today-count">0 transaksi</span>
-            </div>
-            <div class="today-card">
-                <div class="today-stat">
-                    <div class="today-icon income">
-                        <i class="fas fa-arrow-down"></i>
-                    </div>
-                    <div class="today-info">
-                        <span>Pemasukan Hari Ini</span>
-                        <strong id="today-income">Rp 0</strong>
-                    </div>
-                </div>
-                <div class="today-stat">
-                    <div class="today-icon expense">
-                        <i class="fas fa-arrow-up"></i>
-                    </div>
-                    <div class="today-info">
-                        <span>Pengeluaran Hari Ini</span>
-                        <strong id="today-expense">Rp 0</strong>
-                    </div>
-                </div>
-                <div class="today-net">
-                    <span>Sisa Hari Ini</span>
-                    <strong id="today-net">Rp 0</strong>
-                </div>
-            </div>
-        </section>
-
-        <!-- Recent Transactions -->
-        <section class="transactions-section">
-            <div class="section-header">
-                <h3><i class="fas fa-history"></i> Transaksi Terbaru</h3>
-                <button class="btn-text" onclick="showAllTransactions()">Lihat Semua</button>
-            </div>
-            <div class="transactions-list" id="transactions-list">
-                <!-- Transactions will be inserted here -->
-            </div>
-        </section>
-
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <button class="nav-item active" onclick="switchTab('home')">
-                <i class="fas fa-home"></i>
-                <span>Beranda</span>
-            </button>
-            <button class="nav-item" onclick="switchTab('transactions')">
-                <i class="fas fa-exchange-alt"></i>
-                <span>Transaksi</span>
-            </button>
-            <button class="nav-item add-btn" onclick="showAddTransaction()">
-                <i class="fas fa-plus"></i>
-            </button>
-            <button class="nav-item" onclick="switchTab('schedule')">
-                <i class="fas fa-calendar"></i>
-                <span>Jadwal</span>
-            </button>
-            <button class="nav-item" onclick="switchTab('profile')">
-                <i class="fas fa-user"></i>
-                <span>Profil</span>
-            </button>
-        </nav>
-    </div>
-
-    <!-- Add Transaction Modal -->
-    <div id="add-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-title">Tambah Transaksi</h3>
-                <button class="btn-icon" onclick="closeModal('add-modal')">
-                    <i class="fas fa-times"></i>
+            <div class="flex gap-3">
+                <button onclick="closeImportModal()" class="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl font-medium text-gray-700 hover:bg-gray-50 transition-all duration-200">
+                    Batal
                 </button>
-            </div>
-            <form id="transaction-form" onsubmit="saveTransaction(event)">
-                <div class="form-group">
-                    <label>Jenis Transaksi</label>
-                    <div class="type-selector">
-                        <input type="radio" name="type" id="type-income" value="income">
-                        <label for="type-income" class="type-btn income">
-                            <i class="fas fa-arrow-down"></i> Pemasukan
-                        </label>
-                        <input type="radio" name="type" id="type-expense" value="expense" checked>
-                        <label for="type-expense" class="type-btn expense">
-                            <i class="fas fa-arrow-up"></i> Pengeluaran
-                        </label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="amount">Jumlah (Rp)</label>
-                    <input type="number" id="amount" placeholder="0" required min="1">
-                </div>
-                <div class="form-group">
-                    <label for="category">Kategori</label>
-                    <select id="category" required>
-                        <option value="">Pilih Kategori</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="description">Keterangan</label>
-                    <input type="text" id="description" placeholder="Contoh: Makan siang">
-                </div>
-                <div class="form-group">
-                    <label for="date">Tanggal</label>
-                    <input type="date" id="date" required>
-                </div>
-                <div class="form-group">
-                    <label for="time">Waktu</label>
-                    <input type="time" id="time" required>
-                </div>
-                <button type="submit" class="btn-primary">
-                    <i class="fas fa-save"></i> Simpan
+                <button id="importBtn" onclick="confirmImport()" disabled class="flex-1 px-4 py-2.5 bg-amber-500 text-white rounded-xl font-medium hover:bg-amber-600 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Import Data
                 </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Schedule Modal -->
-    <div id="schedule-modal" class="modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h3><i class="fas fa-calendar-alt"></i> Jadwal Keuangan</h3>
-                <button class="btn-icon" onclick="closeModal('schedule-modal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="schedule-container">
-                <div class="calendar-nav">
-                    <button class="btn-icon" onclick="prevMonth()">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
-                    <h4 id="calendar-month">Januari 2024</h4>
-                    <button class="btn-icon" onclick="nextMonth()">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
-                <div class="calendar" id="calendar">
-                    <!-- Calendar will be generated here -->
-                </div>
-                <div class="schedule-summary">
-                    <h4>Ringkasan Bulan Ini</h4>
-                    <div class="summary-grid">
-                        <div class="summary-item">
-                            <span>Total Pemasukan</span>
-                            <strong class="income" id="month-income">Rp 0</strong>
-                        </div>
-                        <div class="summary-item">
-                            <span>Total Pengeluaran</span>
-                            <strong class="expense" id="month-expense">Rp 0</strong>
-                        </div>
-                        <div class="summary-item">
-                            <span>Rata-rata/Hari</span>
-                            <strong id="daily-average">Rp 0</strong>
-                        </div>
-                        <div class="summary-item">
-                            <span>Hari Terbaik</span>
-                            <strong class="income" id="best-day">-</strong>
-                        </div>
-                    </div>
-                </div>
-                <div class="daily-detail" id="daily-detail">
-                    <!-- Daily detail will be shown here -->
-                </div>
             </div>
         </div>
     </div>
 
-    <!-- Report Modal -->
-    <div id="report-modal" class="modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h3><i class="fas fa-chart-pie"></i> Laporan Keuangan</h3>
-                <button class="btn-icon" onclick="closeModal('report-modal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="report-container">
-                <div class="report-tabs">
-                    <button class="tab-btn active" onclick="switchReportTab('weekly')">Mingguan</button>
-                    <button class="tab-btn" onclick="switchReportTab('monthly')">Bulanan</button>
-                    <button class="tab-btn" onclick="switchReportTab('category')">Kategori</button>
-                </div>
-                <div class="report-content" id="report-content">
-                    <!-- Report content will be generated here -->
-                </div>
-                <div class="export-section">
-                    <button class="btn-secondary" onclick="exportData('csv')">
-                        <i class="fas fa-file-csv"></i> Export CSV
-                    </button>
-                    <button class="btn-secondary" onclick="exportData('json')">
-                        <i class="fas fa-file-code"></i> Export JSON
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- All Transactions Modal -->
-    <div id="all-transactions-modal" class="modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h3><i class="fas fa-list"></i> Semua Transaksi</h3>
-                <button class="btn-icon" onclick="closeModal('all-transactions-modal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="filter-section">
-                <input type="text" id="search-transaction" placeholder="Cari transaksi..." oninput="filterTransactions()">
-                <select id="filter-type" onchange="filterTransactions()">
-                    <option value="all">Semua Jenis</option>
-                    <option value="income">Pemasukan</option>
-                    <option value="expense">Pengeluaran</option>
-                </select>
-                <select id="filter-category" onchange="filterTransactions()">
-                    <option value="all">Semua Kategori</option>
-                </select>
-            </div>
-            <div class="transactions-list full" id="all-transactions-list">
-                <!-- All transactions will be listed here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Settings Modal -->
-    <div id="settings-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3><i class="fas fa-cog"></i> Pengaturan</h3>
-                <button class="btn-icon" onclick="closeModal('settings-modal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="settings-container">
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <i class="fas fa-user"></i>
-                        <div>
-                            <strong>Nama</strong>
-                            <span id="display-name">User</span>
-                        </div>
-                    </div>
-                    <button class="btn-text" onclick="changeName()">Ubah</button>
-                </div>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <i class="fas fa-bullseye"></i>
-                        <div>
-                            <strong>Target Harian</strong>
-                            <span id="display-target">Rp 0</span>
-                        </div>
-                    </div>
-                    <button class="btn-text" onclick="changeTarget()">Ubah</button>
-                </div>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <i class="fas fa-palette"></i>
-                        <div>
-                            <strong>Tema</strong>
-                            <span id="display-theme">Terang</span>
-                        </div>
-                    </div>
-                    <button class="btn-text" onclick="toggleTheme()">Ubah</button>
-                </div>
-                <div class="setting-item danger">
-                    <div class="setting-info">
-                        <i class="fas fa-trash"></i>
-                        <div>
-                            <strong>Hapus Semua Data</strong>
-                            <span>Hati-hati! Tidak dapat dikembalikan</span>
-                        </div>
-                    </div>
-                    <button class="btn-danger" onclick="clearAllData()">Hapus</button>
-                </div>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <i class="fas fa-download"></i>
-                        <div>
-                            <strong>Backup Data</strong>
-                            <span>Simpan data ke file</span>
-                        </div>
-                    </div>
-                    <button class="btn-text" onclick="backupData()">Backup</button>
-                </div>
-                <div class="setting-item">
-                    <div class="setting-info">
-                        <i class="fas fa-upload"></i>
-                        <div>
-                            <strong>Restore Data</strong>
-                            <span>Pulihkan dari file backup</span>
-                        </div>
-                    </div>
-                    <input type="file" id="restore-file" accept=".json" onchange="restoreData(event)" hidden>
-                    <button class="btn-text" onclick="document.getElementById('restore-file').click()">Restore</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="toast" class="toast">
-        <i class="fas fa-check-circle"></i>
-        <span id="toast-message">Berhasil!</span>
-    </div>
-
-    <!-- Edit/Delete Confirmation -->
-    <div id="confirm-modal" class="modal">
-        <div class="modal-content modal-small">
-            <div class="confirm-content">
-                <i class="fas fa-question-circle"></i>
-                <h3 id="confirm-title">Konfirmasi</h3>
-                <p id="confirm-message">Apakah Anda yakin?</p>
-                <div class="confirm-actions">
-                    <button class="btn-secondary" onclick="closeModal('confirm-modal')">Batal</button>
-                    <button class="btn-danger" id="confirm-btn">Ya, Hapus</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="js/app.js"></script>
+    <!-- Application Script -->
+    <script src="app.js"></script>
 </body>
 </html>

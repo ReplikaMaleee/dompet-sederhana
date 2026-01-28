@@ -1,0 +1,207 @@
+/* ==========================================
+   Dompet Digital Tracker - Stylesheet
+   ========================================== */
+
+/* Base Styles */
+* {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Custom Scrollbar */
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Gradient Backgrounds */
+.gradient-bg {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.income-gradient {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.expense-gradient {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+.balance-gradient {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+}
+
+/* Card Shadow */
+.card-shadow {
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes pulse-soft {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+.pulse-soft {
+    animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* Toast Animation */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+/* Hover Effects */
+.hover-scale:hover {
+    transform: scale(1.02);
+}
+
+/* Form Focus States */
+input:focus,
+select:focus {
+    outline: none;
+}
+
+/* Radio Button Custom Style */
+input[type="radio"]:checked + div {
+    border-width: 2px;
+}
+
+/* Select Arrow Hide (for custom styling) */
+select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+/* Transaction Item Hover */
+.transaction-item:hover .delete-btn {
+    opacity: 1;
+}
+
+.delete-btn {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+/* Drop Zone Active State */
+.drop-zone-active {
+    border-color: #f59e0b !important;
+    background-color: rgba(245, 158, 11, 0.1) !important;
+}
+
+/* Loading Spinner */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spinner {
+    animation: spin 1s linear infinite;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+    .mobile-full {
+        width: 100%;
+    }
+    
+    .mobile-hide {
+        display: none;
+    }
+}
+
+/* Category Progress Bar */
+.category-progress-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: #e5e7eb;
+    overflow: hidden;
+}
+
+.category-progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s ease-out;
+}
+
+.category-progress-fill.income {
+    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+}
+
+.category-progress-fill.expense {
+    background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+}
+
+/* Category Item Hover */
+.category-item {
+    transition: all 0.2s ease;
+}
+
+.category-item:hover {
+    background-color: #f9fafb;
+    transform: translateX(4px);
+}
+
+/* Print Styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .card-shadow {
+        box-shadow: none;
+        border: 1px solid #e5e7eb;
+    }
+}
